@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đề thi: Đường thẳng và mặt phẳng trong không gian</title>
+    
+    <!-- MathJax для отображения формул -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)']],
+                displayMath: [['\\[', '\\]']]
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <style>
+        /* === CSS STYLES === */
+        :root {
+            --primary: #4F46E5;
+            --primary-hover: #4338CA;
+            --success: #10B981;
+            --danger: #EF4444;
+            --warning: #F59E0B;
+            --bg: #F3F4F6;
+            --text: #1F2937;
+            --text-light: #6B7280;
+            --white: #FFFFFF;
+            --border: #E5E7EB;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            background: var(--white);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .timer {
+            font-weight: bold;
+            color: var(--danger);
+            font-size: 1.2rem;
+        }
+
+        .progress-container {
+            width: 100%;
+            background: var(--border);
+            border-radius: 8px;
+            height: 10px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Navigation Grid */
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 8px;
+            margin-bottom: 20px;
+            background: var(--white);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .nav-btn {
+            padding: 8px 4px;
+            border: 1px solid var(--border);
+            background: var(--white);
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .nav-btn:hover { background: var(--bg); }
+        .nav-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .nav-btn.answered { background: var(--success); color: white; border-color: var(--success); }
+        .nav-btn.wrong { background: var(--danger); color: white; border-color: var(--danger); }
+
+        /* Question Card */
+        .question-card {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .question-card.active { display: block; }
+
+        .question-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .question-text {
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        /* Multiple Choice Options */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .option-btn {
+            padding: 12px 15px;
+            border: 2px solid var(--border);
+            background: var(--white);
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .option-btn:hover:not(.locked) { border-color: var(--primary); background: #EEF2FF; }
+        .option-btn.correct { border-color: var(--success); background: #D1FAE5; color: #065F46; }
+        .option-btn.wrong { border-color: var(--danger); background: #FEE2E2; color: #991B1B; }
+        .option-btn.locked { cursor: not-allowed; opacity: 0.8; }
+
+        /* True/False Table */
+        .tf-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        .tf-table th, .tf-table td {
+            border: 1px solid var(--border);
+            padding: 10px;
+            text-align: center;
+        }
+
+        .tf-table td.text-cell { text-align: left; }
+
+        .tf-btn {
+            padding: 6px 12px;
+            border: 1px solid var(--border);
+            background: var(--white);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+
+        .tf-btn:hover:not(.locked) { background: var(--bg); }
+        .tf-btn.selected { background: var(--primary); color: white; border-color: var(--primary); }
+        .tf-btn.correct { background: var(--success); color: white; border-color: var(--success); }
+        .tf-btn.wrong { background: var(--danger); color: white; border-color: var(--danger); }
+        .tf-btn.locked { cursor: not-allowed; }
+
+        /* Short Answer Input */
+        .short-answer-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .short-answer-input input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .short-answer-input input:focus { outline: none; border-color: var(--primary); }
+
+        /* Solution Box */
+        .solution-box {
+            margin-top: 15px;
+            padding: 15px;
+            background: #F8FAFC;
+            border-left: 4px solid var(--primary);
+            border-radius: 0 8px 8px 0;
+            display: none;
+        }
+
+        .solution-box.show { display: block; }
+
+        .solution-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        /* Action Buttons */
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-success:hover { background: #059669; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-outline { background: white; color: var(--primary); border: 2px solid var(--primary); }
+        .btn-outline:hover { background: #EEF2FF; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Result Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+        }
+
+        .modal-overlay.show { display: flex; }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .result-score {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 10px 0;
+        }
+
+        @media (max-width: 600px) {
+            .stats-bar { flex-direction: column; align-items: flex-start; }
+            .actions { flex-direction: column; }
+            .tf-table th, .tf-table td { padding: 5px; font-size: 0.85rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <h1>ĐỀ LUYỆN TẬP: ĐƯỜNG THẲNG VÀ MẶT PHẲNG TRONG KHÔNG GIAN</h1>
+        <div class="stats-bar">
+            <span id="timeLeft" class="timer">60:00</span>
+            <span>Đã làm: <strong id="answeredCount">0</strong>/22</span>
+        </div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+    </div>
+
+    <!-- Navigation Grid -->
+    <div class="nav-grid" id="navGrid"></div>
+
+    <!-- Question Container -->
+    <div id="questionContainer"></div>
+
+    <!-- Action Buttons -->
+    <div class="actions">
+        <button class="btn btn-outline" id="prevBtn" onclick="changeQuestion(-1)">Câu trước</button>
+        <button class="btn btn-warning" onclick="submitExam()">Nộp bài</button>
+        <button class="btn btn-outline" onclick="resetExam()">Làm lại</button>
+        <button class="btn btn-primary" id="nextBtn" onclick="changeQuestion(1)">Câu tiếp theo</button>
+    </div>
+</div>
+
+<!-- Result Modal -->
+<div class="modal-overlay" id="resultModal">
+    <div class="modal-content">
+        <h2>KẾT QUẢ BÀI THI</h2>
+        <div class="result-score" id="finalScore">0/10</div>
+        <p id="resultStats"></p>
+        <p id="resultTime"></p>
+        <button class="btn btn-primary" onclick="closeModal()" style="margin-top:20px; width:100%;">Xem lại bài làm</button>
+        <button class="btn btn-outline" onclick="resetExam()" style="margin-top:10px; width:100%;">Làm lại bài</button>
+    </div>
+</div>
+
+<script>
+/* === JAVASCRIPT LOGIC & DATA === */
+
+// Dữ liệu câu hỏi (JSON)
+const questionsData = [
+    // PHẦN I: TRẮC NGHIỆM (1-12)
+    {
+        id: 1, type: 1, points: 0.25,
+        text: "Có bao nhiêu đường thẳng đi qua hai điểm phân biệt cho trước?",
+        options: ["0", "1", "2", "Vô số"],
+        correctOption: 1,
+        solution: "Theo tiên đề hình học: Có một và chỉ một đường thẳng đi qua hai điểm phân biệt cho trước. Do đó đáp án đúng là 1."
+    },
+    {
+        id: 2, type: 1, points: 0.25,
+        text: "Một mặt phẳng hoàn toàn xác định khi đi qua:",
+        options: ["Hai điểm phân biệt.", "Ba điểm phân biệt.", "Ba điểm không thẳng hàng.", "Bốn điểm phân biệt."],
+        correctOption: 2,
+        solution: "Có một và chỉ một mặt phẳng đi qua ba điểm không thẳng hàng cho trước. Ba điểm thẳng hàng thì có vô số mặt phẳng đi qua. Đáp án C đúng."
+    },
+    {
+        id: 3, type: 1, points: 0.25,
+        text: "Khẳng định nào sau đây là sai?",
+        options: [
+            "Hai mặt phẳng có thể không có điểm chung.",
+            "Hai mặt phẳng có thể chỉ có một điểm chung.",
+            "Hai mặt phẳng có thể chung nhau một đường thẳng.",
+            "Hai mặt phẳng có thể có vô số điểm chung."
+        ],
+        correctOption: 1,
+        solution: "Nếu hai mặt phẳng phân biệt có một điểm chung thì chúng phải cắt nhau theo một đường thẳng chung duy nhất (chứa tất cả các điểm chung). Do đó, không thể có hai mặt phẳng chỉ có đúng một điểm chung. Khẳng định B sai."
+    },
+    {
+        id: 4, type: 1, points: 0.25,
+        text: "Cho hình chóp \\(S.ABCD\\), đáy \\(ABCD\\) là hình bình hành \\(ABCD\\) tâm \\(O\\). Giao tuyến của hai mặt phẳng \\((SAC)\\) và \\((SAD)\\) là",
+        options: ["\\(SO\\)", "\\(SD\\)", "\\(SA\\)", "\\(SB\\)"],
+        correctOption: 2,
+        solution: "Ta có \\((SAC) \\cap (SAD) = SA\\) do \\(SA\\) là đường thẳng đi qua hai điểm chung \\(S\\) và \\(A\\) của hai mặt phẳng đó."
+    },
+    {
+        id: 5, type: 1, points: 0.25,
+        text: "Cho hình chóp \\(S.ABCD\\). Gọi \\(O\\) là giao điểm của \\(AC\\) và \\(BD\\), \\(M\\) là giao điểm của \\(AB\\) và \\(CD\\), \\(N\\) là giao điểm của \\(AD\\) và \\(BC\\). Giao tuyến của hai mặt phẳng \\((SAC)\\) và \\((SBD)\\) là đường thẳng",
+        options: ["\\(SM\\)", "\\(SO\\)", "\\(SN\\)", "\\(MN\\)"],
+        correctOption: 1,
+        solution: "Hai mặt phẳng \\((SAC)\\) và \\((SBD)\\) có \\(S\\) là điểm chung thứ nhất. \\(O \\in AC \\subset (SAC)\\) và \\(O \\in BD \\subset (SBD)\\) nên \\(O\\) là điểm chung thứ hai. Vậy \\((SAC) \\cap (SBD) = SO\\)."
+    },
+    {
+        id: 6, type: 1, points: 0.25,
+        text: "Cho hình chóp \\(S.ABCD\\) đáy \\(ABCD\\) là hình bình hành tâm \\(O\\). Gọi \\(M\\) là trung điểm của \\(SB\\). Giao điểm của \\(DM\\) và \\((SAC)\\) là",
+        options: [
+            "Giao điểm của \\(DM\\) và \\(SA\\).",
+            "Giao điểm của \\(DM\\) và \\(SC\\).",
+            "Giao điểm của \\(DM\\) và \\(SO\\).",
+            "Giao điểm của \\(DM\\) và \\(BD\\)."
+        ],
+        correctOption: 2,
+        solution: "Trong \\((SBD)\\), gọi \\(I = SO \\cap DM\\). Ta có \\(I \\in DM\\) và \\(I \\in SO \\subset (SAC)\\). Vậy \\(I = DM \\cap (SAC)\\) là giao điểm của \\(DM\\) và \\(SO\\)."
+    },
+    {
+        id: 7, type: 1, points: 0.25,
+        text: "Cho bốn điểm không đồng phẳng \\(S, A, B, C\\). Gọi \\(H, K\\) lần lượt là hai điểm trên hai cạnh \\(SA, SC\\) (\\(H \\neq A, H \\neq S\\) và \\(K \\neq S, K \\neq C\\)) sao cho \\(HK\\) không song song với \\(AC\\). Gọi \\(I\\) là trung điểm của \\(BC\\). Giao điểm của đường thẳng \\(BK\\) và mặt phẳng \\((SAI)\\) là",
+        options: [
+            "\\(J\\) với \\(J = SI \\cap BK\\).",
+            "\\(J\\) với \\(J = SI \\cap BH\\).",
+            "\\(J\\) với \\(J = SI \\cap HK\\).",
+            "\\(J\\) với \\(J = SI \\cap HK\\)."
+        ],
+        correctOption: 0,
+        solution: "Trong mặt phẳng \\((SBC)\\), gọi \\(J = BK \\cap SI\\). Ta có \\(J \\in BK \\subset (BHK)\\) và \\(J \\in SI\\). Mà \\(SI\\) nằm trong \\((SAI)\\). Do \\(HK\\) không song song \\(AC\\), \\(SI\\) là giao tuyến của \\((SAI)\\) và \\((SBC)\\). Vậy \\(J = BK \\cap (SAI)\\)."
+    },
+    {
+        id: 8, type: 1, points: 0.25,
+        text: "Cho hình chóp \\(S.ABCD\\) có \\(ABCD\\) là hình bình hành. Điểm \\(M\\) thuộc cạnh \\(SC\\) sao cho \\(3SM = MC\\), \\(N\\) là giao điểm của \\(SD\\) và \\((MAB)\\). Gọi \\(O\\) là giao điểm của \\(AC\\) và \\(BD\\). Khi đó ba đường thẳng nào đồng quy?",
+        options: ["\\(AB, MN, CD\\)", "\\(SO, BD, AM\\)", "\\(SO, AM, BN\\)", "\\(SO, AC, BN\\)"],
+        correctOption: 2,
+        solution: "Gọi \\(I = BN \\cap AM\\). Ta có \\(I \\in (SBD)\\) và \\(I \\in (SAC)\\). Mà \\(O\\) cũng thuộc cả hai mặt phẳng này. Giao tuyến \\((SBD) \\cap (SAC) = SO\\). Suy ra \\(I \\in SO\\). Vậy ba đường thẳng \\(SO, AM, BN\\) đồng quy."
+    },
+    {
+        id: 9, type: 1, points: 0.25,
+        text: "Cho hình chóp \\(S.ABC\\). Các điểm \\(M, N, P\\) tương ứng trên các cạnh \\(SA, SB, SC\\) sao cho \\(AB\\) cắt \\(MN\\) tại \\(D\\); \\(BC\\) cắt \\(NP\\) tại \\(E\\), \\(CA\\) cắt \\(MP\\) tại \\(F\\). Khi đó có thể kết luận gì về ba điểm \\(D, E, F\\).",
+        options: [
+            "\\(D, E, F\\) thẳng hàng",
+            "\\(D, E, F\\) là ba đỉnh của một tam giác.",
+            "\\(E\\) là trung điểm của đoạn thẳng \\(DF\\).",
+            "\\(D, E, F\\) không cùng thuộc một mặt phẳng."
+        ],
+        correctOption: 0,
+        solution: "Ta có \\(D = AB \\cap MN \\Rightarrow D \\in (ABC) \\cap (MNP)\\). Tương tự \\(E \\in (ABC) \\cap (MNP)\\) và \\(F \\in (ABC) \\cap (MNP)\\). Do đó \\(D, E, F\\) cùng thuộc giao tuyến của hai mặt phẳng \\((ABC)\\) và \\((MNP)\\). Vậy \\(D, E, F\\) thẳng hàng."
+    },
+    {
+        id: 10, type: 1, points: 0.25,
+        text: "Cho bốn điểm \\(A, B, C, D\\) không đồng phẳng. Gọi \\(M, N\\) lần lượt là trung điểm của \\(AC\\) và \\(BC\\). Trên đoạn \\(BD\\) lấy điểm \\(P\\) sao cho \\(2BP = PD\\). Giao điểm của đường thẳng \\(CD\\) và mặt phẳng \\((MNP)\\) là giao điểm của",
+        options: ["\\(CD\\) và \\(NP\\)", "\\(CD\\) và \\(MN\\)", "\\(CD\\) và \\(MP\\)", "\\(CD\\) và \\(AP\\)"],
+        correctOption: 0,
+        solution: "Trong mặt phẳng \\((BCD)\\), có \\(CD \\cap NP = O\\). Ta có \\(NP \\subset (MNP)\\) nên \\(O \\in (MNP)\\). Mà \\(O \\in CD\\). Vậy \\(CD \\cap (MNP) = O = CD \\cap NP\\)."
+    },
+    {
+        id: 11, type: 1, points: 0.25,
+        text: "Cho tứ diện \\(ABCD\\). Gọi \\(E\\) và \\(F\\) lần lượt là trung điểm của \\(AB\\) và \\(CD\\); \\(G\\) là trọng tâm tam giác \\(BCD\\). Giao điểm của đường thẳng \\(EG\\) và mặt phẳng \\((ACD)\\) là",
+        options: [
+            "Điểm \\(F\\).",
+            "Giao điểm của đường thẳng \\(EG\\) và \\(AC\\).",
+            "Giao điểm của đường thẳng \\(EG\\) và \\(AF\\).",
+            "Giao điểm của đường thẳng \\(EG\\) và \\(CD\\)."
+        ],
+        correctOption: 2,
+        solution: "Vì \\(G\\) là trọng tâm \\(BCD\\), \\(F\\) là trung điểm \\(CD\\) nên \\(G \\in BF\\) (do đó \\(G \\in (ABF)\\)). Mà \\(E\\) là trung điểm \\(AB\\) nên \\(E \\in (ABF)\\). Gọi \\(M = EG \\cap AF\\). Mà \\(AF \\subset (ACD)\\) suy ra \\(M \\in (ACD)\\). Vậy giao điểm cần tìm là giao điểm của \\(EG\\) và \\(AF\\)."
+    },
+    {
+        id: 12, type: 1, points: 0.25,
+        text: "Trong xây dựng, người ta thường dùng máy quét tia laser để kẻ các đường thẳng trên tường hoặc trên sàn nhà. Đoạn thẳng nào sau đây là giao tuyến của mặt phẳng tạo bởi các tia laser \\(OA\\) và \\(OB\\) với các mặt tường trong hình vẽ?",
+        options: ["\\(OA, OB\\)", "\\(AC, BC\\)", "\\(AB, AC\\)", "\\(AB, AC\\)"],
+        correctOption: 1,
+        solution: "Mặt phẳng tạo bởi các tia laser \\(OA\\) và \\(OB\\) là mặt phẳng \\((OACB)\\). Giao tuyến của mặt phẳng này với các mặt tường (chứa \\(AC\\) và \\(BC\\)) chính là \\(AC\\) và \\(BC\\)."
+    },
+
+    // PHẦN II: ĐÚNG/SAI (13-16)
+    {
+        id: 13, type: 2, points: 1.0,
+        text: "Cho tứ diện \\(ABCD\\).",
+        statements: [
+            { text: "a) \\(A \\notin (BCD)\\)", correct: true, explanation: "Vì 4 điểm \\(A, B, C, D\\) không đồng phẳng nên \\(A \\notin (BCD)\\). Nhận định ĐÚNG." },
+            { text: "b) Có vô số mặt phẳng chứa 4 điểm \\(A, B, C, D\\)", correct: false, explanation: "Vì 4 điểm không đồng phẳng nên không tồn tại mặt phẳng nào chứa cả 4 điểm. Nhận định SAI." },
+            { text: "c) \\((ACD) \\cap (BCD) = CD\\)", correct: true, explanation: "\\(CD\\) là đường thẳng đi qua 2 điểm chung \\(C, D\\) của hai mặt phẳng \\((ACD)\\) và \\((BCD)\\). Nhận định ĐÚNG." },
+            { text: "d) Tứ diện \\(ABCD\\) có 4 cạnh", correct: false, explanation: "Tứ diện \\(ABCD\\) có 6 cạnh: \\(AB, AC, AD, BC, BD, CD\\). Nhận định SAI." }
+        ],
+        solution: "Chú ý tính chất không đồng phẳng của tứ diện và số cạnh của hình tứ diện (4 mặt, 6 cạnh)."
+    },
+    {
+        id: 14, type: 2, points: 1.0,
+        text: "Cho tứ diện \\(ABCD\\). Gọi \\(I, J\\) lần lượt là trung điểm của \\(AD, BC\\), \\(M\\) là một điểm trên cạnh \\(AB\\), \\(N\\) là một điểm trên cạnh \\(AC\\). Khi đó:",
+        statements: [
+            { text: "a) \\(ND\\) là giao tuyến của hai mặt phẳng \\((MND)\\) và \\((ADC)\\).", correct: true, explanation: "\\(N\\) và \\(D\\) là hai điểm chung của hai mặt phẳng \\((MND)\\) và \\((ADC)\\) nên giao tuyến là \\(ND\\). Nhận định ĐÚNG." },
+            { text: "b) \\(BI\\) là giao tuyến của hai mặt phẳng \\((BCI)\\) và \\((ABD)\\).", correct: true, explanation: "\\(B\\) và \\(I\\) là hai điểm chung của hai mặt phẳng \\((BCI)\\) và \\((ABD)\\) nên giao tuyến là \\(BI\\). Nhận định ĐÚNG." },
+            { text: "c) \\(IJ\\) là giao tuyến của hai mặt phẳng \\((IBC)\\) và \\((JAD)\\).", correct: true, explanation: "Ta có \\(I \\in AD \\subset (JAD)\\) và \\(J \\in BC \\subset (IBC)\\). Đồng thời \\(I, J\\) đều thuộc cả hai mặt phẳng trên. Suy ra giao tuyến là \\(IJ\\). Nhận định ĐÚNG." },
+            { text: "d) Giao tuyến của hai mặt phẳng \\((IBC)\\) và \\((DMN)\\) song song với đường thẳng \\(IJ\\).", correct: false, explanation: "Giao tuyến của \\((IBC)\\) và \\((DMN)\\) là \\(EF\\) (với \\(E = DN \\cap CI\\), \\(F = DM \\cap BI\\)). Khi đó \\(EF\\) cắt \\(IJ\\) chứ không song song. Nhận định SAI." }
+        ],
+        solution: "Cần xác định chính xác các điểm chung của hai mặt phẳng để tìm giao tuyến."
+    },
+    {
+        id: 15, type: 2, points: 1.0,
+        text: "Cho hình chóp \\(S.ABCD\\) có đáy là tứ giác lồi có các cặp cạnh đối không song song với nhau. Giao của \\(AC\\) và \\(BD\\) là \\(O\\).",
+        statements: [
+            { text: "a) Giao điểm của \\(AC\\) và \\((SBD)\\) là điểm \\(O\\).", correct: true, explanation: "Vì \\(O\\) nằm trên \\(BD\\) nên \\(O \\in (SBD)\\). Mà \\(O \\in AC\\). Vậy \\(O = AC \\cap (SBD)\\). Nhận định ĐÚNG." },
+            { text: "b) Giao điểm của \\(AB\\) và \\((SCD)\\) chính là giao điểm của \\(AD\\) và \\(BC\\).", correct: false, explanation: "Giao điểm của \\(AB\\) và \\((SCD)\\) chính là giao điểm của \\(AB\\) và \\(CD\\) (do \\(AB\\) và \\(CD\\) cùng nằm trong mặt phẳng đáy và không song song). Nhận định SAI." },
+            { text: "c) Gọi \\(M, N\\) lần lượt là trung điểm của \\(SA\\) và \\(SC\\). Khi đó giao điểm của \\(MN\\) và \\((SBD)\\) chính là trung điểm của \\(SO\\).", correct: true, explanation: "Trong \\(\\Delta SAC\\), \\(MN\\) là đường trung bình \\(\\Rightarrow MN // AC\\). Giao điểm của \\(MN\\) và \\((SBD)\\) là giao điểm của \\(MN\\) và \\(SO\\). Do \\(MN // AC\\) nên theo Ta-lét, giao điểm này là trung điểm của \\(SO\\). Nhận định ĐÚNG." },
+            { text: "d) Nếu \\(ABCD\\) là hình bình hành thì giao điểm của \\(SD\\) và \\((BMN)\\) là điểm \\(E\\) nằm trên đoạn thẳng \\(SD\\) và \\(\\frac{SE}{ED} = \\frac{1}{3}\\).", correct: false, explanation: "Gọi \\(F\\) là giao điểm của \\(MN\\) và \\(SO\\). Giao điểm \\(E = SD \\cap (BMN)\\) là giao của \\(BF\\) và \\(SD\\). Áp dụng Menelaus cho \\(\\Delta SOD\\) ta có \\(\\frac{SE}{ED} = \\frac{2}{3}\\). Nhận định SAI." }
+        ],
+        solution: "Vận dụng định lý Menelaus và Ta-lét trong không gian để kiểm tra các tỉ số."
+    },
+    {
+        id: 16, type: 2, points: 1.0,
+        text: "Cho tứ diện \\(ABCD\\). Trên các cạnh \\(AB, AC, BD\\) lần lượt lấy ba điểm \\(E, F, G\\) sao cho \\(3AB = AE\\); \\(2AC = AF\\); \\(4GB = GD\\).",
+        statements: [
+            { text: "a) Giao tuyến của hai mặt phẳng \\((EFG)\\) và \\((ABC)\\) là đường thẳng \\(EF\\).", correct: true, explanation: "\\(E, F\\) là hai điểm chung của hai mặt phẳng \\((EFG)\\) và \\((ABC)\\) nên giao tuyến là \\(EF\\). Nhận định ĐÚNG." },
+            { text: "b) Giao điểm của đường thẳng \\(BC\\) và mặt phẳng \\((EFG)\\) là điểm \\(M\\) với \\(M = EF \\cap BC\\).", correct: true, explanation: "Trong \\((ABC)\\), kéo dài \\(BC\\) và \\(EF\\) cắt nhau tại \\(M\\). \\(M\\) thuộc \\(EF\\) nên thuộc \\((EFG)\\). Vậy \\(M = BC \\cap (EFG)\\). Nhận định ĐÚNG." },
+            { text: "c) Nếu điểm \\(H\\) là giao điểm của \\(CD\\) với \\((EFG)\\) thì 3 điểm \\(H, G, M\\) thẳng hàng.", correct: true, explanation: "Ta có \\(G, M\\) là hai điểm chung của \\((BCD)\\) và \\((EFG)\\) nên giao tuyến là \\(GM\\). \\(H = CD \\cap (EFG)\\) mà \\(CD \\subset (BCD)\\) nên \\(H \\in (BCD) \\cap (EFG) = GM\\). Vậy \\(H, G, M\\) thẳng hàng. Nhận định ĐÚNG." },
+            { text: "d) Gọi \\(I\\) là giao điểm của đường thẳng \\(AD\\) và \\((EFG)\\). Tỉ số \\(\\frac{IA}{ID} = \\frac{7}{3}\\).", correct: false, explanation: "Trong \\((ABD)\\), kéo dài \\(EG\\) và \\(AD\\) cắt nhau tại \\(I\\). Áp dụng định lý Menelaus cho \\(\\Delta ABD\\) ta có \\(\\frac{AI}{ID} = 2\\). Nhận định SAI." }
+        ],
+        solution: "Tìm giao tuyến, giao điểm bằng cách xác định điểm chung. Vận dụng Menelaus để tìm tỉ số."
+    },
+
+    // PHẦN III: TỰ LUẬN NGẮN (17-22)
+    {
+        id: 17, type: 3, points: 0.5,
+        text: "Cho tứ diện đều \\(ABCD\\) có cạnh bằng \\(a\\). Gọi \\(I\\) là trung điểm của \\(AD\\), \\(J\\) là điểm đối xứng với \\(D\\) qua \\(C\\), \\(K\\) là điểm đối xứng với \\(D\\) qua \\(B\\). Gọi \\(d\\) là giao tuyến của hai mặt phẳng \\((IJK)\\) và \\((ABC)\\). Gọi \\(E, F\\) lần lượt là giao điểm của đường thẳng \\(d\\) với \\(AB, AC\\). Tính tỉ số \\(\\frac{AE}{BE}\\).",
+        correctAnswers: ["2"],
+        solution: "Gọi \\(E = IK \\cap AB \\Rightarrow E \\in (IJK)\\), \\(F = IJ \\cap AC \\Rightarrow F \\in (IJK)\\). Khi đó \\(d \\equiv EF = (ABC) \\cap (IJK)\\). Dễ thấy \\(E, F\\) lần lượt là trọng tâm các tam giác \\(ADK\\) và \\(ADJ\\) nên \\(\\frac{AE}{BE} = 2\\)."
+    },
+    {
+        id: 18, type: 3, points: 0.5,
+        text: "Cho hình chóp \\(S.ABC\\). Gọi \\(M, N\\) lần lượt là trung điểm của \\(SA\\) và \\(BC\\). \\(P\\) là điểm nằm trên cạnh \\(AB\\) sao cho \\(\\frac{AP}{AB} = \\frac{1}{3}\\). Gọi \\(Q\\) là giao điểm của \\(SC\\) với mặt phẳng \\((MNP)\\). Biết tỉ số \\(\\frac{SQ}{SC} = \\frac{a}{b}\\) (là phân số tối giản, \\(a, b \\in \\mathbb{N}^*\\)). Tính tổng \\(S = a + b\\).",
+        correctAnswers: ["4"],
+        solution: "Trong mặt phẳng \\((ABC)\\), gọi \\(E = AC \\cap PN\\). Khi đó \\(Q = SC \\cap EM\\). Áp dụng định lí Menelaus vào \\(\\Delta ABC\\) ta có \\(\\frac{AP}{PB}.\\frac{BN}{NC}.\\frac{CE}{EA} = 1 \\Rightarrow \\frac{CE}{EA} = 2\\). Áp dụng định lí Menelaus vào \\(\\Delta SAC\\) ta có \\(\\frac{AM}{MS}.\\frac{SQ}{QC}.\\frac{CE}{EA} = 1 \\Rightarrow \\frac{SQ}{QC} = \\frac{1}{2} \\Rightarrow \\frac{SQ}{SC} = \\frac{1}{3}\\). Suy ra \\(a=1, b=3 \\Rightarrow S = 4\\)."
+    },
+    {
+        id: 19, type: 3, points: 0.5,
+        text: "Cho hình chóp \\(S.ABCD\\) có đáy \\(ABCD\\) là hình bình hành. \\(M\\) là trung điểm của \\(SC\\). Gọi \\(I\\) là giao điểm của đường thẳng \\(AM\\) với mặt phẳng \\((SBD)\\). Tính tỉ số \\(\\frac{IA}{IM}\\).",
+        correctAnswers: ["2"],
+        solution: "Gọi \\(O = AC \\cap BD\\) thì \\((SAC) \\cap (SBD) = SO\\). Trong mặt phẳng \\((SAC)\\), lấy \\(I = AM \\cap SO\\) suy ra \\(I = AM \\cap (SBD)\\). Do trong tam giác \\(SAC\\), \\(AM\\) và \\(SO\\) là hai đường trung tuyến nên \\(I\\) là trọng tâm của \\(\\Delta SAC\\). Vậy \\(\\frac{IA}{IM} = 2\\)."
+    },
+    {
+        id: 20, type: 3, points: 0.5,
+        text: "Cho tứ diện \\(ABCD\\). Gọi \\(E, F, G\\) lần lượt là các điểm thuộc các cạnh \\(AB, AC, BD\\) sao cho \\(EF\\) cắt \\(BC\\) tại \\(I\\), \\(EG\\) cắt \\(AD\\) tại \\(H\\). Nếu ba đường thẳng \\(CD, IG, HF\\) đồng quy thì chọn 1, không đồng quy thì chọn 2, song song thì chọn 3, chéo nhau thì chọn 4, không nằm ở trường hợp nào của các lựa chọn trước thì chọn 5.",
+        correctAnswers: ["1"],
+        solution: "Trong mặt phẳng \\((BCD)\\), gọi \\(O = CD \\cap IG\\). Ta có \\(O \\in IG \\subset (EFH)\\) và \\(O \\in CD \\subset (ACD)\\) nên \\(O \\in (ACD) \\cap (EFH)\\). Mặt khác \\(H, F\\) cũng thuộc giao tuyến này, tức là \\(HF = (ACD) \\cap (EFH)\\). Do đó \\(O \\in HF\\), hay ba đường thẳng \\(CD, IG, HF\\) đồng quy tại \\(O\\). Vậy chọn 1."
+    },
+    {
+        id: 21, type: 3, points: 0.5,
+        text: "Cho hình chóp \\(S.ABCD\\) có đáy \\(ABCD\\) là hình bình hành tâm \\(O\\). \\(M\\) là trung điểm của \\(SC\\), \\(N\\) là trung điểm của \\(OB\\). Gọi \\(E\\) giao điểm của đường thẳng \\(SD\\) và mặt phẳng \\((AMN)\\). Tỉ số \\(\\frac{SE}{SD}\\) bằng? (Viết dưới dạng số thập phân)",
+        correctAnswers: ["0.4", "0,4", "2/5"],
+        solution: "Trong mặt phẳng \\((SAC)\\) gọi \\(I = AM \\cap SO\\). Ta có \\(I \\in (AMN)\\) và \\(I \\in (SBD)\\). Mặt khác \\(N\\) cũng thuộc cả hai mặt phẳng này. Suy ra giao tuyến \\((SBD) \\cap (AMN) = NI\\). Gọi \\(E = NI \\cap SD\\). \\(I\\) là trọng tâm \\(\\Delta SAC\\) nên \\(\\frac{IS}{IO} = 2\\). Mà \\(\\frac{NO}{ND} = \\frac{1}{3}\\). Áp dụng Menelaus cho \\(\\Delta SDO\\) ta có \\(\\frac{NO}{ND}.\\frac{ED}{ES}.\\frac{IS}{IO} = 1 \\Rightarrow \\frac{ED}{ES} = \\frac{3}{2} \\Rightarrow \\frac{SE}{SD} = \\frac{2}{5} = 0.4\\)."
+    },
+    {
+        id: 22, type: 3, points: 0.5,
+        text: "Cho tứ diện \\(ABCD\\) có tất cả các cạnh đều bằng \\(3\\). Gọi \\(I\\) là trung điểm của \\(AD\\), \\(J\\) là điểm đối xứng của \\(D\\) qua \\(C\\) và \\(K\\) là điểm đối xứng với \\(D\\) qua \\(B\\). Giao tuyến của mặt phẳng \\((IJK)\\) với các mặt của tứ diện \\(ABCD\\) tạo thành một hình phẳng, tính diện tích của hình phẳng đó.",
+        correctAnswers: ["1.5", "1,5", "3/2"],
+        solution: "Giao tuyến tạo thành tam giác \\(IPE\\) (với \\(P = IJ \\cap AC\\), \\(E = IK \\cap AB\\)). Ta thấy \\(E, P\\) lần lượt là trọng tâm \\(\\Delta ADK\\) và \\(\\Delta ADJ\\) nên \\(AE = AP = 2\\). Suy ra \\(PE // BC\\) và \\(PE = \\frac{2}{3}BC = 2\\). Áp dụng Cô-sin cho \\(\\Delta AEI\\) ta có \\(IE^2 = IP^2 = \\frac{13}{4}\\). Áp dụng Hê-rông: \\(S_{IPE} = \\frac{3}{2} = 1.5\\)."
+    }
+];
+
+// Biến trạng thái toàn cục
+let currentIndex = 0;
+let userAnswers = new Array(questionsData.length).fill(null);
+let questionStates = new Array(questionsData.length).fill(null); // null, 'correct', 'wrong'
+let timerInterval;
+let timeLeft = 60 * 60; // 60 phút tính bằng giây
+let isSubmitted = false;
+
+// Khởi tạo ứng dụng
+function init() {
+    shuffleOptions();
+    renderNavGrid();
+    renderQuestion(0);
+    startTimer();
+    updateStats();
+}
+
+// Xáo trộn đáp án cho câu hỏi loại 1
+function shuffleOptions() {
+    questionsData.forEach(q => {
+        if (q.type === 1) {
+            let indices = [0, 1, 2, 3];
+            // Fisher-Yates Shuffle
+            for (let i = indices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [indices[i], indices[j]] = [indices[j], indices[i]];
+            }
+            q.shuffledOptions = indices.map(i => q.options[i]);
+            q.shuffledCorrectIndex = indices.indexOf(q.correctOption);
+        }
+    });
+}
+
+// Bắt đầu đồng hồ đếm ngược
+function startTimer() {
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            submitExam();
+        }
+        updateTimerDisplay();
+    }, 1000);
+}
+
+function updateTimerDisplay() {
+    const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+    const s = (timeLeft % 60).toString().padStart(2, '0');
+    document.getElementById('timeLeft').innerText = `${m}:${s}`;
+}
+
+// Cập nhật thanh tiến trình và số câu đã làm
+function updateStats() {
+    const answeredCount = userAnswers.filter(a => a !== null).length;
+    document.getElementById('answeredCount').innerText = answeredCount;
+    
+    const progress = (answeredCount / questionsData.length) * 100;
+    document.getElementById('progressBar').style.width = `${progress}%`;
+
+    // Cập nhật navigation grid
+    const navBtns = document.querySelectorAll('.nav-btn');
+    navBtns.forEach((btn, idx) => {
+        btn.classList.remove('active', 'answered', 'wrong');
+        if (idx === currentIndex) btn.classList.add('active');
+        if (userAnswers[idx] !== null) {
+            if(questionStates[idx] === 'wrong') btn.classList.add('wrong');
+            else btn.classList.add('answered');
+        }
+    });
+}
+
+// Render bảng điều hướng
+function renderNavGrid() {
+    const grid = document.getElementById('navGrid');
+    grid.innerHTML = '';
+    questionsData.forEach((q, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'nav-btn';
+        btn.innerText = q.id;
+        btn.onclick = () => renderQuestion(idx);
+        grid.appendChild(btn);
+    });
+}
+
+// Render câu hỏi
+function renderQuestion(index) {
+    currentIndex = index;
+    const q = questionsData[index];
+    const container = document.getElementById('questionContainer');
+    
+    let html = `<div class="question-card active" id="q-${q.id}">`;
+    html += `<div class="question-title">Câu ${q.id} (${q.points} điểm)</div>`;
+    html += `<div class="question-text">${q.text}</div>`;
+
+    const isLocked = userAnswers[index] !== null;
+
+    if (q.type === 1) {
+        html += `<div class="options-grid">`;
+        const labels = ['A', 'B', 'C', 'D'];
+        q.shuffledOptions.forEach((opt, optIdx) => {
+            let classes = "option-btn";
+            if (isLocked) {
+                classes += " locked";
+                if (optIdx === q.shuffledCorrectIndex) classes += " correct";
+                else if (userAnswers[index] === optIdx && optIdx !== q.shuffledCorrectIndex) classes += " wrong";
+            }
+            html += `<button class="${classes}" onclick="selectOption(${index}, ${optIdx})" ${isLocked ? 'disabled' : ''}>
+                        <strong>${labels[optIdx]}.</strong>&nbsp;${opt}
+                     </button>`;
+        });
+        html += `</div>`;
+    } 
+    else if (q.type === 2) {
+        html += `<table class="tf-table">
+                    <thead><tr><th></th><th>Đúng</th><th>Sai</th></tr></thead><tbody>`;
+        q.statements.forEach((st, stIdx) => {
+            const isStLocked = userAnswers[index] !== null && userAnswers[index][stIdx] !== undefined;
+            const userAns = isStLocked ? userAnswers[index][stIdx] : null;
+            let trueClass = "tf-btn", falseClass = "tf-btn";
+            
+            if (isStLocked) {
+                trueClass += " locked";
+                falseClass += " locked";
+                if (st.correct === true) trueClass += " correct";
+                else trueClass += " wrong";
+                if (st.correct === false) falseClass += " correct";
+                else falseClass += " wrong";
+                if (userAns === true) trueClass += " selected";
+                if (userAns === false) falseClass += " selected";
+            }
+
+            html += `<tr>
+                        <td class="text-cell">${st.text}</td>
+                        <td><button class="${trueClass}" onclick="selectTF(${index}, ${stIdx}, true)" ${isStLocked ? 'disabled' : ''}>Đúng</button></td>
+                        <td><button class="${falseClass}" onclick="selectTF(${index}, ${stIdx}, false)" ${isStLocked ? 'disabled' : ''}>Sai</button></td>
+                     </tr>`;
+        });
+        html += `</tbody></table>`;
+        if (!isLocked) html += `<button class="btn btn-primary" onclick="checkTF(${index})" style="margin-top:10px; width:100%;">Kiểm tra</button>`;
+    } 
+    else if (q.type === 3) {
+        html += `<div class="short-answer-input">
+                    <input type="text" id="shortInput-${index}" placeholder="Nhập đáp án số..." ${isLocked ? 'disabled value="'+userAnswers[index]+'"' : ''}>
+                    <button class="btn btn-primary" onclick="checkShortAnswer(${index})" ${isLocked ? 'disabled' : ''}>Kiểm tra</button>
+                 </div>`;
+    }
+
+    // Nút xem lời giải
+    if (isLocked) {
+        html += `<button class="btn btn-outline" onclick="toggleSolution(${index})" style="margin-top:15px; width:100%;">Xem lời giải</button>`;
+        html += `<div class="solution-box" id="solution-${index}">
+                    <div class="solution-title">Lời giải chi tiết:</div>
+                    ${q.solution}
+                 </div>`;
+    }
+
+    html += `</div>`;
+    container.innerHTML = html;
+    updateStats();
+    MathJax.typesetPromise(); // Render lại công thức Toán học
+}
+
+// Xử lý chọn đáp án Part 1
+function selectOption(qIdx, optIdx) {
+    if (userAnswers[qIdx] !== null) return;
+    const q = questionsData[qIdx];
+    userAnswers[qIdx] = optIdx;
+    
+    if (optIdx === q.shuffledCorrectIndex) {
+        questionStates[qIdx] = 'correct';
+    } else {
+        questionStates[qIdx] = 'wrong';
+    }
+    
+    renderQuestion(qIdx);
+    autoNextQuestion();
+}
+
+// Xử lý chọn Đúng/Sai Part 2
+function selectTF(qIdx, stIdx, val) {
+    if (userAnswers[qIdx] !== null) return;
+    if (!userAnswers[qIdx]) userAnswers[qIdx] = {};
+    userAnswers[qIdx][stIdx] = val;
+    
+    // Tạm thời render lại để hiện nút đã bấm
+    const q = questionsData[qIdx];
+    const table = document.getElementById(`q-${q.id}`).querySelector('.tf-table');
+    const rows = table.querySelectorAll('tbody tr');
+    
+    const trueBtn = rows[stIdx].querySelector('td:nth-child(2) button');
+    const falseBtn = rows[stIdx].querySelector('td:nth-child(3) button');
+    
+    trueBtn.classList.remove('selected');
+    falseBtn.classList.remove('selected');
+    if(val === true) trueBtn.classList.add('selected');
+    if(val === false) falseBtn.classList.add('selected');
+}
+
+// Kiểm tra câu Đúng/Sai
+function checkTF(qIdx) {
+    const q = questionsData[qIdx];
+    if (!userAnswers[qIdx] || Object.keys(userAnswers[qIdx]).length < 4) {
+        alert("Vui lòng chọn Đúng/Sai cho tất cả 4 ý trước khi kiểm tra!");
+        return;
+    }
+    
+    let correctCount = 0;
+    q.statements.forEach((st, idx) => {
+        if (userAnswers[qIdx][idx] === st.correct) correctCount++;
+    });
+
+    if (correctCount === 4) questionStates[qIdx] = 'correct';
+    else questionStates[qIdx] = 'wrong';
+
+    renderQuestion(qIdx);
+    autoNextQuestion();
+}
+
+// Kiểm tra câu trả lời ngắn
+function checkShortAnswer(qIdx) {
+    const q = questionsData[qIdx];
+    const inputEl = document.getElementById(`shortInput-${qIdx}`);
+    const userVal = inputEl.value.trim().replace(',', '.'); // Chuyển dấu phẩy thành chấm
+    
+    if (userVal === "") {
+        alert("Vui lòng nhập đáp án!");
+        return;
+    }
+
+    userAnswers[qIdx] = inputEl.value; // Lưu nguyên bản gốc
+    
+    // Kiểm tra đáp án (chấp nhận số thực, phân số)
+    const isCorrect = q.correctAnswers.some(ans => {
+        if (ans.includes('/')) {
+            // Nếu là phân số, kiểm tra cả giá trị thập phân và chuỗi
+            const parts = ans.split('/');
+            const decimalVal = parseFloat(parts[0]) / parseFloat(parts[1]);
+            return userVal === ans || parseFloat(userVal) === decimalVal;
+        }
+        return userVal === ans || parseFloat(userVal) === parseFloat(ans);
+    });
+
+    if (isCorrect) questionStates[qIdx] = 'correct';
+    else questionStates[qIdx] = 'wrong';
+
+    renderQuestion(qIdx);
+    autoNextQuestion();
+}
+
+// Tự động chuyển câu sau 1.5s
+function autoNextQuestion() {
+    setTimeout(() => {
+        if (currentIndex < questionsData.length - 1) {
+            renderQuestion(currentIndex + 1);
+        }
+    }, 1500);
+}
+
+// Hiển thị/ẩn lời giải
+function toggleSolution(qIdx) {
+    const solBox = document.getElementById(`solution-${qIdx}`);
+    solBox.classList.toggle('show');
+}
+
+// Chuyển câu hỏi
+function changeQuestion(step) {
+    let newIndex = currentIndex + step;
+    if (newIndex >= 0 && newIndex < questionsData.length) {
+        renderQuestion(newIndex);
+    }
+}
+
+// Tính điểm
+function calculateScore() {
+    let totalScore = 0;
+    let correctCount = 0;
+    let wrongCount = 0;
+
+    questionsData.forEach((q, idx) => {
+        if (q.type === 1) {
+            if (userAnswers[idx] === q.shuffledCorrectIndex) {
+                totalScore += 0.25;
+                correctCount++;
+            } else if (userAnswers[idx] !== null) {
+                wrongCount++;
+            }
+        } 
+        else if (q.type === 2) {
+            if (userAnswers[idx]) {
+                let stCorrect = 0;
+                q.statements.forEach((st, stIdx) => {
+                    if (userAnswers[idx][stIdx] === st.correct) stCorrect++;
+                });
+                if (stCorrect === 1) totalScore += 0.1;
+                else if (stCorrect === 2) totalScore += 0.25;
+                else if (stCorrect === 3) totalScore += 0.5;
+                else if (stCorrect === 4) { totalScore += 1.0; correctCount++; }
+                else wrongCount++;
+            }
+        } 
+        else if (q.type === 3) {
+            if (userAnswers[idx] !== null) {
+                const userVal = userAnswers[idx].trim().replace(',', '.');
+                const isCorrect = q.correctAnswers.some(ans => {
+                    if (ans.includes('/')) {
+                        const parts = ans.split('/');
+                        const decimalVal = parseFloat(parts[0]) / parseFloat(parts[1]);
+                        return userVal === ans || parseFloat(userVal) === decimalVal;
+                    }
+                    return userVal === ans || parseFloat(userVal) === parseFloat(ans);
+                });
+                if (isCorrect) {
+                    totalScore += 0.5;
+                    correctCount++;
+                } else {
+                    wrongCount++;
+                }
+            }
+        }
+    });
+
+    return { totalScore: totalScore.toFixed(2), correctCount, wrongCount };
+}
+
+// Nộp bài
+function submitExam() {
+    if (isSubmitted) return;
+    isSubmitted = true;
+    clearInterval(timerInterval);
+
+    const result = calculateScore();
+    const timeTaken = 3600 - timeLeft;
+    const m = Math.floor(timeTaken / 60);
+    const s = timeTaken % 60;
+
+    document.getElementById('finalScore').innerText = `${result.totalScore} / 10`;
+    document.getElementById('resultStats').innerText = `Correct: ${result.correctCount} | Wrong: ${result.wrongCount} | Percentage: ${(result.totalScore * 10).toFixed(0)}%`;
+    document.getElementById('resultTime').innerText = `Time taken: ${m}m ${s}s`;
+    
+    document.getElementById('resultModal').classList.add('show');
+}
+
+function closeModal() {
+    document.getElementById('resultModal').classList.remove('show');
+    // Mở khóa tất cả lời giải
+    questionsData.forEach((q, idx) => {
+        if(userAnswers[idx] === null) userAnswers[idx] = 'skipped'; // Đánh dấu chưa làm
+        if(q.type === 2 && userAnswers[idx] === 'skipped') userAnswers[idx] = {0: null, 1: null, 2: null, 3: null}; // Fix lỗi null cho T/F
+    });
+    renderQuestion(currentIndex);
+}
+
+// Làm lại bài
+function resetExam() {
+    isSubmitted = false;
+    userAnswers = new Array(questionsData.length).fill(null);
+    questionStates = new Array(questionsData.length).fill(null);
+    timeLeft = 60 * 60;
+    currentIndex = 0;
+    clearInterval(timerInterval);
+    document.getElementById('resultModal').classList.remove('show');
+    shuffleOptions();
+    renderQuestion(0);
+    startTimer();
+    updateStats();
+}
+
+// Chạy ứng dụng
+window.onload = init;
+</script>
+
+</body>
+</html>
+```
